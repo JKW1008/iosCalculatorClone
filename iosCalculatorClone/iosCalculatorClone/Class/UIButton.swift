@@ -7,13 +7,13 @@
 
 import UIKit
 
-
-
 class   MyButton: UIButton {
 
-    convenience init(title: String){
+    convenience init(title: String, fontSize: CGFloat = 30, color: UIColor, textColor: UIColor){
         self.init(frame: .zero)
         setTitle(title, for: .normal)
+        setTitleColor(textColor, for: .normal)
+        backgroundColor = color
     }
     
     override init(frame: CGRect) {
@@ -28,7 +28,7 @@ class   MyButton: UIButton {
     private func commonInit() {
         backgroundColor = .systemGray
         layer.cornerRadius = 6
-        titleLabel?.font = .systemFont(ofSize: 16)
+        titleLabel?.font = .systemFont(ofSize: 30)
         layer.borderColor = .none
         layer.borderWidth = 0.5
     }

@@ -10,18 +10,24 @@ import UIKit
 class ViewController: UIViewController {
     
     let allView = UIView()
-    let btn1 = MyButton(title: "7")
+    let btn1 = MyButton(title: "AC", color: .systemGray, textColor: .systemBackground)
     
-
+    let calculatorLayout: [[CalculatorButtonType]] = [
+        [.clear("AC"), .function("+/-"), .function("%"), .mathOperator("÷")],
+        [.number("7"), .number("8"), .number("9"), .mathOperator("×")],
+        [.number("4"), .number("5"), .number("6"), .mathOperator("-")],
+        [.number("1"), .number("2"), .number("3"), .mathOperator("+")],
+        [.function("📱"), .number("0"), .function("."), .mathOperator("=")]
+    ]
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        btn1.frame = CGRect(x: 50, y: 100, width: 60, height: 60)
-        btn1.layer.cornerRadius = 30
+        btn1.frame = CGRect(x: 20, y: 350, width: 80, height: 80)
+        btn1.layer.cornerRadius = btn1.frame.width / 2
+    
         view.addSubview(btn1)
         //configureUI()
-
-    
     }
 }
 
