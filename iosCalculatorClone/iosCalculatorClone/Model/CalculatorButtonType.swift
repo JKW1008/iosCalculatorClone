@@ -29,11 +29,11 @@ enum CalculatorButtonType {
     var colors: (background: UIColor, text: UIColor) {
         switch self {
             case .number:
-                return (.systemGray2, .white)
+                return (.deepDarkGray, .white)
             case .mathOperator:
                 return (.systemOrange, .white)
             case .function, .clear:
-                return (.systemGray, .white)
+                return (.darkGray, .white)
         }
     }
 }
