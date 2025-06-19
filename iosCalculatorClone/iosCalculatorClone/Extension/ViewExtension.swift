@@ -9,47 +9,140 @@ import UIKit
 
 extension ViewController {
     final func configureUI() {
+        createButtonsFromArray()
         setAttributes()
-        addTarget()
+        addTargets()
         setConstraints()
     }
     
-    final private func setAttributes() {
-        allView.backgroundColor = .black
+    final private func createButtonsFromArray() {
+        for (rowIndex, row) in calculatorLayout.enumerated() {
+            for (colIndex, buttonType) in row.enumerated() {
+                let button = createSingleButton(from: buttonType)
+                
+                button.tag = rowIndex * 10 + colIndex
+                
+                calculatorButtons.append(button)
+            }
+        }
     }
     
-    final private func addTarget() {
-//        btn1.addTarget(self, action: #selector(btn1), for: <#T##UIControl.Event#>)
+    final private func createSingleButton(from buttonType: CalculatorButtonType) -> MyButton {
+        let colors = buttonType.colors
+        
+        let button = MyButton(title: buttonType.title, color: colors.background, textColor: colors.text)
+        
+        //  버튼 크기 계산
+        let screenWidth = UIScreen.main.bounds.width
+        let padding: CGFloat = 40   //  좌우 패딩 (20 + 20)
+        let buttonSpacing: CGFloat = 10 * 3 //  버튼 간 간격 (3개의 간격)
+        let availableWidth = screenWidth - padding - buttonSpacing
+        let buttonSize = availableWidth / 4  //  4개 버튼으로 나누기
+        
+        //  정사각형 버튼 보장
+        button.widthAnchor.constraint(equalToConstant: buttonSize).isActive = true
+        button.heightAnchor.constraint(equalToConstant: buttonSize).isActive = true
+        
+        //  Aspect ratio 1:1 고정 (추가 보장)
+        button.widthAnchor.constraint(equalTo: button.heightAnchor).isActive = true
+        
+        return button
+    }
+    
+    final private func setAttributes() {
+        view.backgroundColor = .black
+        displayLabel.text = "0"
+        displayLabel.textColor = .white
+        displayLabel.font = .systemFont(ofSize: 60, weight: .light)
+        displayLabel.textAlignment = .right
+        displayLabel.numberOfLines = 1
+        displayLabel.adjustsFontSizeToFitWidth = true
+        displayLabel.minimumScaleFactor = 0.5
+    }
+    
+    final private func addTargets() {
+        for button in calculatorButtons {
+            button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
+        }
+    }
+    
+    @objc private func buttonTapped(_ sender: MyButton) {
+        guard let title = sender.title(for: .normal) else { return }
+        
+        let row = sender.tag / 10
+        let col = sender.tag % 10
+        
+        print("button '\(title)' tapped - position: (\(row), \(col))")
+        
+        displayLabel.text = title
     }
     
     final private func setConstraints() {
-        let stackView = UIStackView(arrangedSubviews: [allView])
-        stackView.axis = .vertical
-        stackView.distribution = .fill
+        let buttonGrid = createButtonGrid()
+        let mainStackView = UIStackView(arrangedSubviews: [displayLabel, buttonGrid])
+        mainStackView.axis = .vertical
+        mainStackView.distribution = .fill
+        mainStackView.spacing = 20
         
-        let stackBtn = UIStackView(arrangedSubviews: [btn1])
-        stackBtn.axis = .vertical
-        stackBtn.distribution = .fill
-        stackBtn.spacing = 400
+        view.addSubview(mainStackView)
+        mainStackView.translatesAutoresizingMaskIntoConstraints = false
         
-
-        view.addSubview(stackView)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(stackBtn)
-        stackBtn.translatesAutoresizingMaskIntoConstraints = false
+        let screenWidth = UIScreen.main.bounds.width
+        let padding: CGFloat = 40   //  좌우 패딩 (20 + 20)
+        let buttonSpacing: CGFloat = 10 * 3 //  버튼 간 간격 (3개의 간격)
+        let availableWidth = screenWidth - padding - buttonSpacing
+        let buttonSize = availableWidth / 4  //  4개 버튼으로 나누기
+        let gridHeight = (buttonSize * 5) + (10 * 4)
         
         
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: view.topAnchor),
-            stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor ),
-            stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+//            mainStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
+            mainStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            mainStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            mainStackView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20 ),
             
-            stackBtn.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 160),
-            stackBtn.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            displayLabel.heightAnchor.constraint(equalToConstant: 100),
+            buttonGrid.heightAnchor.constraint(equalToConstant: gridHeight),
             
-            stackBtn.widthAnchor.constraint(equalToConstant: 130)
         ])
+    }
+    
+    final private func createButtonGrid() -> UIStackView {
+        var rowStackViews: [UIStackView] = []
+        
+        for (rowIndex, row) in calculatorLayout.enumerated() {
+            let buttonForRow = row.enumerated().map { (colIndex, _) in
+                let tag = rowIndex * 10 + colIndex
+                return calculatorButtons.first { $0.tag == tag } ?? UIView()
+            }
+            
+            let rowStackView = UIStackView(arrangedSubviews: buttonForRow)
+            rowStackView.axis = .horizontal
+            rowStackView.distribution = .fillEqually
+            rowStackView.alignment = .center
+            rowStackView.spacing = 10
+            
+            rowStackViews.append(rowStackView)
+        }
+        
+        let gridStackView = UIStackView(arrangedSubviews: rowStackViews)
+        gridStackView.axis = .vertical
+        gridStackView.distribution = .fillEqually
+        gridStackView.alignment = .fill
+        gridStackView.spacing = 10
+        
+        return gridStackView
+    }
+}
 
+extension ViewController {
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        for button in calculatorButtons {
+            //  완전한 원형 보장
+            let size = min(button.frame.width, button.frame.height)
+            button.layer.cornerRadius = size / 2
+        }
     }
 }
