@@ -9,11 +9,22 @@ import UIKit
 
 class   MyButton: UIButton {
 
-    convenience init(title: String, fontSize: CGFloat = 30, color: UIColor, textColor: UIColor){
+    convenience init(title: String? = nil, image: String? = nil, color: UIColor, textColor: UIColor){
         self.init(frame: .zero)
         setTitle(title, for: .normal)
+        if let imageName = image {
+            setImage(UIImage(systemName: imageName), for: .normal)
+        }
         setTitleColor(textColor, for: .normal)
         backgroundColor = color
+    }
+    
+    convenience init(buttonType: CalculatorButtonType, fontSize: CGFloat = 30) {
+        let colors = buttonType.colors
+        self.init(title: buttonType.title,
+                  image: buttonType.imageName,
+                  color: colors.background,
+                  textColor: colors.text)
     }
     
     override init(frame: CGRect) {
@@ -22,7 +33,7 @@ class   MyButton: UIButton {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("sibal")
+        fatalError("fatal Error")
     }
     
     private func commonInit() {
