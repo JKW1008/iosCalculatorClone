@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Symbols
 
 class ViewController: UIViewController {
     
@@ -14,12 +15,12 @@ class ViewController: UIViewController {
     let displayLabel = UILabel()
 //    let btn1 = MyButton(title: "AC", color: .systemGray, textColor: .systemBackground)
     
-    let calculatorLayout: [[CalculatorButtonType]] = [
-        [.clear("AC"), .function("+/-"), .function("%"), .mathOperator("÷")],
-        [.number("7"), .number("8"), .number("9"), .mathOperator("×")],
-        [.number("4"), .number("5"), .number("6"), .mathOperator("-")],
-        [.number("1"), .number("2"), .number("3"), .mathOperator("+")],
-        [.number("📱"), .number("0"), .number("."), .mathOperator("=")]
+    let calculatorLayout: [[CalculatorButtonType]] =  [
+        [.clear("AC"), .operatorImage("plus.forwardslash.minus"), .operatorImage("percent"), .mathOperator("divide")],
+        [.number("7"), .number("8"), .number("9"), .mathOperator("multiply")],
+        [.number("4"), .number("5"), .number("6"), .mathOperator("minus")],
+        [.number("1"), .number("2"), .number("3"), .mathOperator("plus")],
+        [.image("candybarphone"), .number("0"), .number("."), .mathOperator("equal")]
     ]
     
 //    for i in calculatorButtons {

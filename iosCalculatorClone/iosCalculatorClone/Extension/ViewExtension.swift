@@ -28,9 +28,7 @@ extension ViewController {
     }
     
     final private func createSingleButton(from buttonType: CalculatorButtonType) -> MyButton {
-        let colors = buttonType.colors
-        
-        let button = MyButton(title: buttonType.title, color: colors.background, textColor: colors.text)
+        let button = MyButton(buttonType: buttonType)
         
         //  버튼 크기 계산
         let screenWidth = UIScreen.main.bounds.width
@@ -38,6 +36,33 @@ extension ViewController {
         let buttonSpacing: CGFloat = 10 * 3 //  버튼 간 간격 (3개의 간격)
         let availableWidth = screenWidth - padding - buttonSpacing
         let buttonSize = availableWidth / 4  //  4개 버튼으로 나누기
+        
+        //  폰트 사이즈를 버튼 사이즈에 맞게 설정
+        let fontSize = buttonSize * 0.4
+        button.titleLabel?.font = .systemFont(ofSize: fontSize)
+        
+        //  아이콘이 이미지인 경우
+        switch buttonType {
+            case .image(_), .operatorImage(_), .mathOperator(_):
+                //  이미지 크기를 버튼 크기의 비율로 설정
+                let imageSize = buttonSize * 0.4
+                
+                // 이미지 크기, 색 조절
+                button.imageView?.contentMode = .scaleAspectFit
+                button.tintColor = buttonType.colors.text
+                
+                //  비율 기반 이미지 크기 설정
+                let configuration = UIImage.SymbolConfiguration(pointSize: imageSize, weight: .medium)
+                if let currentImage = button.image(for: .normal) {
+                    let resizedImage = currentImage.withConfiguration(configuration)
+                    button.setImage(resizedImage, for: .normal)
+                }
+                
+                button.setTitle(nil, for: .normal)
+            default:
+                break
+        }
+
         
         //  정사각형 버튼 보장
         button.widthAnchor.constraint(equalToConstant: buttonSize).isActive = true
