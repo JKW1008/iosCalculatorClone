@@ -43,31 +43,4 @@ class   MyButton: UIButton {
         layer.borderColor = .none
         layer.borderWidth = 0.5
     }
-    
-    override var isEnabled: Bool {
-        didSet { updateStateUI() }
-    }
-    
-    override var isHighlighted: Bool {
-        didSet { updateStateUI() }
-    }
-    
-    private func updateStateUI() {
-        switch state {
-            case .normal:
-                DispatchQueue.main.async {
-                    self.backgroundColor = .none
-                }
-            case .highlighted:
-                DispatchQueue.main.async {
-                    self.backgroundColor = .none
-                }
-            case .disabled:
-                DispatchQueue.main.async {
-                    self.backgroundColor = .none
-                }
-            default:
-                break
-        }
-    }
 }
