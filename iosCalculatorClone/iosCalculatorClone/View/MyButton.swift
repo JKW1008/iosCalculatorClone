@@ -43,4 +43,24 @@ class   MyButton: UIButton {
         layer.borderColor = .none
         layer.borderWidth = 0.5
     }
+
+    private var originalBackgroundColor: UIColor?
+
+    override var isHighlighted: Bool {
+        didSet {
+            if originalBackgroundColor == nil {
+                originalBackgroundColor = backgroundColor // 최초 한 번만 저장
+            }
+            
+            UIView.animate(withDuration: 0.1) {
+                if self.isHighlighted {
+                    // 하얗게 밝게
+                    self.backgroundColor = UIColor.white.withAlphaComponent(0.4)
+                } else {
+                    // 원래 색상으로 복원
+                    self.backgroundColor = self.originalBackgroundColor
+                }
+            }
+        }
+    }
 }
