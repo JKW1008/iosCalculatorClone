@@ -41,6 +41,10 @@ extension ViewController {
         let fontSize = buttonSize * 0.4
         button.titleLabel?.font = .systemFont(ofSize: fontSize)
         
+        if case .clear(_) = buttonType {
+            buttonStateManager.setClearButton(button)
+        }
+        
         //  아이콘이 이미지인 경우
         switch buttonType {
             case .image(_), .operatorImage(_), .mathOperator(_):
@@ -96,6 +100,18 @@ extension ViewController {
         
         let row = sender.tag / 10
         let col = sender.tag % 10
+        let buttonType = calculatorLayout[row][col]
+        
+        switch buttonType {
+            case .number(_):
+                buttonStateManager.onNumberInput()
+            case .clear:
+                _ = buttonStateManager.handleClearButtonActinon()
+            case .mathOperator("equal"):
+                buttonStateManager.onCalculationComplete()
+            default:
+                break
+        }
         
         print("button '\(title)' tapped - position: (\(row), \(col))")
         

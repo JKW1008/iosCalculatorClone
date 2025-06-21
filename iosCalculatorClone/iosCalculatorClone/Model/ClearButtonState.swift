@@ -10,3 +10,8 @@ enum ClearButtonState {
     case clear
     case calculated
 }
+
+enum ClearButtonAction {
+    case allClear
+    case deleteLast
+}

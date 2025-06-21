@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     var calculatorButtons: [MyButton] = []
     let displayLabel = UILabel()
 //    let btn1 = MyButton(title: "AC", color: .systemGray, textColor: .systemBackground)
-    
+    let buttonStateManager = ButtonStateManager()
     let calculatorLayout: [[CalculatorButtonType]] =  [
         [.clear("AC"), .operatorImage("plus.forwardslash.minus"), .operatorImage("percent"), .mathOperator("divide")],
         [.number("7"), .number("8"), .number("9"), .mathOperator("multiply")],
@@ -33,7 +33,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
 //        btn1.frame = CGRect(x: 20, y: 350, width: 80, height: 80)
 //        btn1.layer.cornerRadius = btn1.frame.width / 2
-//    
+//
 //        view.addSubview(btn1)
         configureUI()
     }
