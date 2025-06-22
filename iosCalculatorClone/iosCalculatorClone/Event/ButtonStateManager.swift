@@ -51,10 +51,9 @@ class ButtonStateManager {
             case .calculated:
                 updateState(to: .allClear)
         }
-        
     }
     
-    func handleClearButtonActinon() -> ClearButtonAction {
+    func handleClearButtonAction() -> ClearButtonAction {
         switch currentState {
             case .allClear:
                 return .allClear

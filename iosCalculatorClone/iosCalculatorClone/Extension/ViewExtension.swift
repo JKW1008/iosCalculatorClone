@@ -96,26 +96,36 @@ extension ViewController {
     }
     
     @objc private func buttonTapped(_ sender: MyButton) {
-        guard let title = sender.title(for: .normal) else { return }
-        
         let row = sender.tag / 10
         let col = sender.tag % 10
         let buttonType = calculatorLayout[row][col]
         
         switch buttonType {
-            case .number(_):
+            case .number(let number):
+                //  실제 숫자값을 NumberInputHandler로 전달
+                numberInputHandler.handleNumberInput(number)
+                //  상태 업데이트
                 buttonStateManager.onNumberInput()
-            case .clear:
-                _ = buttonStateManager.handleClearButtonActinon()
+            case .number("."):
+                numberInputHandler.handleDecimalInput()
+                buttonStateManager.onNumberInput()
+            case .clear(_):
+                print("Clear button press")
+                let action = buttonStateManager.handleClearButtonAction()
+                switch action {
+                    case .allClear:
+                        print("AC button press")
+                        numberInputHandler.clearDisplay()
+                        buttonStateManager.onClearButtonPressed()
+                    case .deleteLast:
+                        print("delete last button press")
+                        numberInputHandler.deleteLastCharacter()
+                }
             case .mathOperator("equal"):
                 buttonStateManager.onCalculationComplete()
             default:
                 break
         }
-        
-        print("button '\(title)' tapped - position: (\(row), \(col))")
-        
-        displayLabel.text = title
     }
     
     final private func setConstraints() {
