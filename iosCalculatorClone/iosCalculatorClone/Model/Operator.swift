@@ -11,6 +11,7 @@ enum SelectedOperator {
     case minus
     case multiply
     case divide
+    case modulo
     case equal
     
     static func fromString(_ operatorString: String) -> SelectedOperator? {
@@ -19,6 +20,7 @@ enum SelectedOperator {
             case "minus": return .minus
             case "multiply": return .multiply
             case "divide": return .divide
+            case "percent": return .modulo
             case "equal": return .equal
             default: return nil
         }
@@ -30,13 +32,14 @@ enum SelectedOperator {
             case .minus: return "-"
             case .multiply: return "*"
             case .divide: return "÷"
+            case .modulo: return "%"
             case .equal: return "="
         }
     }
     
     var isBinaryOperator: Bool {
         switch self {
-            case .plus, .minus, .multiply, .divide: return true
+            case .plus, .minus, .multiply, .divide, .modulo: return true
             case .equal: return false
         }
     }

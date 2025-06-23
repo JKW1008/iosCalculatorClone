@@ -25,7 +25,8 @@ class NumberInputHandler {
     
     func handleNumberInput(_ number: String) {
         guard let stateManager = stateManager, let displayLabel = displayLabel else { return }
-        
+        print("🔢 handleNumberInput called with: \(number)")
+        print("🔢 shouldStartNewInput: \(stateManager.getStartNewInput())")
         if stateManager.getStartNewInput() {
             stateManager.setStartNewInput(false)
             startNewNumberInput(number)
@@ -49,7 +50,7 @@ class NumberInputHandler {
             case .clear:
                 continueNumberInput(currentText: currentText, newDigit: number)
         }
-        
+        formatDisplayWithCommas()
         print ("Number input: \(number), Display: \(displayLabel.text ?? "")")
     }
     
@@ -90,7 +91,12 @@ class NumberInputHandler {
             return nil
         }
         
-        let numbersOnly = text.replacingOccurrences(of: ",", with: "")
+        var numbersOnly = text.replacingOccurrences(of: ",", with: "")
+        
+        if numbersOnly.hasPrefix("(") && numbersOnly.hasSuffix(")") {
+            numbersOnly = String(numbersOnly.dropFirst().dropLast())
+        }
+        
         let decimal = NSDecimalNumber(string: numbersOnly)
         if decimal != NSDecimalNumber.notANumber {
             return decimal.doubleValue
@@ -174,7 +180,22 @@ class NumberInputHandler {
 //        guard let displayLabel = displayLabel else { return }
 //    }
     
-    
+    func toggleSign() {
+        guard let displayLabel = displayLabel, let currentValue = getCurrentValue() else {
+            return
+        }
+        
+        if currentValue > 0 {
+            displayLabel.text = "(-\(Int(currentValue)))"
+        } else if currentValue > 0 {
+            let positiveValue = abs(currentValue)
+            if positiveValue.truncatingRemainder(dividingBy: 1) == 0 {
+                displayLabel.text = String(format: "%.0f", positiveValue)
+            } else {
+                displayLabel.text = String(positiveValue)
+            }
+        }
+    }
 }
 
 extension NumberInputHandler {

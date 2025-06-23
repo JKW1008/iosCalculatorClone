@@ -107,6 +107,7 @@ class ButtonStateManager {
         
         if operation != nil && operation != .equal {
             setStartNewInput(true)
+            print("🔄 Set shouldStartNewInput = true for operation: \(operation?.symbol ?? "nil")")
         }
     }
     

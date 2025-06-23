@@ -149,7 +149,22 @@ extension ViewController {
                         buttonStateManager.setSelectedOperator(operation)
                     }
                 }
+            case .operatorImage("plus.forwardslash.minus"):
+                numberInputHandler.toggleSign()
+            case .operatorImage("percent"):
+                print("🔘 Percent button pressed!")
+                if let operation = SelectedOperator.fromString("percent") {
+                    print("🔘 Percent operation created")
+
+                    calculatorBrain.performOperation(operation)
+                    
+                    let result = calculatorBrain.getResult()
+                    numberInputHandler.setDisplayValue(result)
+                    buttonStateManager.setSelectedOperator(operation)
+                }
                 
+                guard let currentValue = numberInputHandler.getCurrentValue() else { return }
+                calculatorBrain.setOperand(currentValue)
             default:
                 break
         }

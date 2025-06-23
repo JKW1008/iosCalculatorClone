@@ -22,7 +22,7 @@ class CalculatorBrain {
     
     func performOperation(_ operation: SelectedOperator) {
         switch operation {
-            case .plus, .minus, .multiply, .divide:
+            case .plus, .minus, .multiply, .divide, .modulo:
                 handlBinaryOperation(operation)
             case .equal:
                 handleEqualOperation()
@@ -74,6 +74,12 @@ class CalculatorBrain {
                     result = 0
                 } else {
                     result = previousValue / currentValue
+                }
+            case .modulo:
+                if currentValue == 0 {
+                    result = 0
+                } else {
+                    result = previousValue.truncatingRemainder(dividingBy: currentValue)
                 }
             case .equal:
                 result = currentValue
