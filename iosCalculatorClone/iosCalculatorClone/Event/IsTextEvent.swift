@@ -187,7 +187,7 @@ class NumberInputHandler {
         
         if currentValue > 0 {
             displayLabel.text = "(-\(Int(currentValue)))"
-        } else if currentValue > 0 {
+        } else if currentValue < 0 {
             let positiveValue = abs(currentValue)
             if positiveValue.truncatingRemainder(dividingBy: 1) == 0 {
                 displayLabel.text = String(format: "%.0f", positiveValue)
