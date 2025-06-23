@@ -15,6 +15,7 @@ class ViewController: UIViewController {
     let displayLabel = UILabel()
 //    let btn1 = MyButton(title: "AC", color: .systemGray, textColor: .systemBackground)
     let buttonStateManager = ButtonStateManager()
+    let calculatorBrain = CalculatorBrain()
     lazy var numberInputHandler = NumberInputHandler(displayLabel: displayLabel, stateManager: buttonStateManager)
     let calculatorLayout: [[CalculatorButtonType]] =  [
         [.clear("AC"), .operatorImage("plus.forwardslash.minus"), .operatorImage("percent"), .mathOperator("divide")],

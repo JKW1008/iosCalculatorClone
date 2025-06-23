@@ -10,14 +10,24 @@ import UIKit
 class ButtonStateManager {
     private var currentState: ClearButtonState = .allClear
     private weak var clearButton: MyButton?
+    private var selectedOperator: SelectedOperator?
+    private var startNewInput: Bool = false
     
     func setClearButton(_ button: MyButton) {
         self.clearButton = button
         updateClearButtonUI()
     }
     
-    func getCurrentStaet() -> ClearButtonState {
+    func setStartNewInput(_ flag: Bool) {
+        startNewInput = flag
+    }
+    
+    func getCurrentState() -> ClearButtonState {
         return currentState
+    }
+    
+    func getStartNewInput() -> Bool {
+        return startNewInput
     }
     
     func updateState(to newState: ClearButtonState) {
@@ -90,5 +100,17 @@ class ButtonStateManager {
                     button.setImage(resizedImage, for: .normal)
                 }
         }
+    }
+    
+    func setSelectedOperator(_ operation: SelectedOperator?) {
+        selectedOperator = operation
+        
+        if operation != nil && operation != .equal {
+            setStartNewInput(true)
+        }
+    }
+    
+    func getSelectedOperator() -> SelectedOperator? {
+        return selectedOperator
     }
 }

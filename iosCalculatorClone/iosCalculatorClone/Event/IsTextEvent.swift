@@ -10,17 +10,31 @@ import UIKit
 class NumberInputHandler {
     private weak var displayLabel: UILabel?
     private weak var stateManager: ButtonStateManager?
-    private let maxDigits = 9
     
     init(displayLabel: UILabel, stateManager: ButtonStateManager) {
         self.displayLabel = displayLabel
         self.stateManager = stateManager
     }
     
+    private lazy var integerFromatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }()
+    
     func handleNumberInput(_ number: String) {
         guard let stateManager = stateManager, let displayLabel = displayLabel else { return }
         
-        let currentState = stateManager.getCurrentStaet()
+        if stateManager.getStartNewInput() {
+            stateManager.setStartNewInput(false)
+            startNewNumberInput(number)
+            stateManager.onNumberInput()
+            formatDisplayWithCommas()
+            return
+        }
+        
+        let currentState = stateManager.getCurrentState()
         let currentText = displayLabel.text ?? "0"
         
         switch currentState {
@@ -53,7 +67,7 @@ class NumberInputHandler {
         guard let displayLabel = displayLabel,
               let statemanager = stateManager else { return }
         let currentText = displayLabel.text ?? "0"
-        let currentState = statemanager.getCurrentStaet()
+        let currentState = statemanager.getCurrentState()
         
         if currentText.contains(".") {
             return
@@ -87,7 +101,7 @@ class NumberInputHandler {
             displayLabel.text = String(format: "%0.8g", value)
         }
         
-        limitDisplayLength()
+//        limitDisplayLength()
     }
     
     func clearDisplay() {
@@ -97,16 +111,43 @@ class NumberInputHandler {
     private func continueNumberInput(currentText: String, newDigit: String) {
         guard let displayLabel = displayLabel else { return }
         
-        if currentText.count >= maxDigits {
-            return
-        }
-        
         if currentText == "0" && newDigit != "0" {
             displayLabel.text = newDigit
         } else {
             displayLabel.text = currentText + newDigit
         }
-        limitDisplayLength()
+//        limitDisplayLength()
+        formatDisplayWithCommas()
+    }
+    
+    private func formatDisplayWithCommas() {
+        guard let displayLabel = displayLabel, let text = displayLabel.text else { return }
+        
+        let numbersOnly = text .replacingOccurrences(of: ",", with: "")
+        
+        guard numbersOnly.contains(".") else {
+            if let number = Double(numbersOnly) {
+                let integerValue = Int(number)
+                if let formattedString = integerFromatter.string(from: NSNumber(value: integerValue)) {
+                    displayLabel.text = formattedString
+                }
+            }
+            return
+        }
+        
+        // 소수점이 있는 경우
+        let parts = numbersOnly.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
+        guard parts.count == 2 else { return }
+        
+        let integerPart = String(parts[0])
+        let decimalPart = String(parts[1])
+        
+        guard let integerValue = Double(integerPart) else { return }
+        
+        let intValue = Int(integerValue)
+        if let formattedInteger = integerFromatter.string(from: NSNumber(value: intValue)) {
+            displayLabel.text = formattedInteger + "." + decimalPart
+        }
     }
     
     func deleteLastCharacter() {
@@ -120,13 +161,13 @@ class NumberInputHandler {
         }
         print("Delete last character, Display: \(displayLabel.text ?? "")")
     }
+
     
-    private func limitDisplayLength() {
-        guard let displayLabel = displayLabel, let text = displayLabel.text, text.count > maxDigits else { return }
-        
-        let endIndex = text.index(text.startIndex, offsetBy: maxDigits)
-        displayLabel.text = String(text[..<endIndex])
-    }
+//    private func limitDisplayLength() {
+//        guard let displayLabel = displayLabel else { return }
+//    }
+    
+    
 }
 
 extension NumberInputHandler {
