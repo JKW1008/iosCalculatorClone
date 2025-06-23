@@ -86,10 +86,17 @@ class NumberInputHandler {
     }
     
     func getCurrentValue() -> Double? {
-        guard let displayLabel = displayLabel, let text = displayLabel.text, let value = Double(text) else {
+        guard let displayLabel = displayLabel, let text = displayLabel.text else {
             return nil
         }
-        return value
+        
+        let numbersOnly = text.replacingOccurrences(of: ",", with: "")
+        let decimal = NSDecimalNumber(string: numbersOnly)
+        if decimal != NSDecimalNumber.notANumber {
+            return decimal.doubleValue
+        }
+        
+        return nil
     }
     
     func setDisplayValue(_ value: Double) {
@@ -126,9 +133,9 @@ class NumberInputHandler {
         let numbersOnly = text .replacingOccurrences(of: ",", with: "")
         
         guard numbersOnly.contains(".") else {
-            if let number = Double(numbersOnly) {
-                let integerValue = Int(number)
-                if let formattedString = integerFromatter.string(from: NSNumber(value: integerValue)) {
+            let decimal = NSDecimalNumber(string: numbersOnly)
+            if decimal != NSDecimalNumber.notANumber {
+                if let formattedString = integerFromatter.string(from: decimal) {
                     displayLabel.text = formattedString
                 }
             }
@@ -142,11 +149,11 @@ class NumberInputHandler {
         let integerPart = String(parts[0])
         let decimalPart = String(parts[1])
         
-        guard let integerValue = Double(integerPart) else { return }
-        
-        let intValue = Int(integerValue)
-        if let formattedInteger = integerFromatter.string(from: NSNumber(value: intValue)) {
-            displayLabel.text = formattedInteger + "." + decimalPart
+        let decimal = NSDecimalNumber(string: integerPart)
+        if decimal != NSDecimalNumber.notANumber {
+            if let formattedInteager = integerFromatter.string(from: decimal) {
+                displayLabel.text = formattedInteager + "." + decimalPart
+            }
         }
     }
     
