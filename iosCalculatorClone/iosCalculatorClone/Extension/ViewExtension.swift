@@ -15,6 +15,19 @@ extension ViewController {
         setConstraints()
     }
     
+    private func calculateButtonSize() -> CGFloat {
+        let screenWidth = UIScreen.main.bounds.width
+        let padding: CGFloat = 40   //  좌우 패딩 (20 + 20)
+        let buttonSpacing: CGFloat = 10 * 3 //  버튼 간 간격 (3개의 간격)
+        let availableWidth = screenWidth - padding - buttonSpacing
+        return availableWidth / 4   //  4개 버튼으로 나누기
+    }
+    
+    private func calculateGridHeight() -> CGFloat {
+        let buttonSize = calculateButtonSize()
+        return (buttonSize * 5) + (10 * 4)
+    }
+    
     final private func createButtonsFromArray() {
         for (rowIndex, row) in calculatorLayout.enumerated() {
             for (colIndex, buttonType) in row.enumerated() {
@@ -29,17 +42,15 @@ extension ViewController {
     
     final private func createSingleButton(from buttonType: CalculatorButtonType) -> MyButton {
         let button = MyButton(buttonType: buttonType)
-        
-        //  버튼 크기 계산
-        let screenWidth = UIScreen.main.bounds.width
-        let padding: CGFloat = 40   //  좌우 패딩 (20 + 20)
-        let buttonSpacing: CGFloat = 10 * 3 //  버튼 간 간격 (3개의 간격)
-        let availableWidth = screenWidth - padding - buttonSpacing
-        let buttonSize = availableWidth / 4  //  4개 버튼으로 나누기
+        let buttonSize = calculateButtonSize()
         
         //  폰트 사이즈를 버튼 사이즈에 맞게 설정
         let fontSize = buttonSize * 0.4
         button.titleLabel?.font = .systemFont(ofSize: fontSize)
+        
+        if case .clear(_) = buttonType {
+            buttonStateManager.setClearButton(button)
+        }
         
         //  아이콘이 이미지인 경우
         switch buttonType {
@@ -76,9 +87,12 @@ extension ViewController {
     
     final private func setAttributes() {
         view.backgroundColor = .black
+        
+        let buttonSize = calculateButtonSize()
+        let fontSize = buttonSize * 0.8
         displayLabel.text = "0"
         displayLabel.textColor = .white
-        displayLabel.font = .systemFont(ofSize: 60, weight: .light)
+        displayLabel.font = .systemFont(ofSize: fontSize, weight: .light)
         displayLabel.textAlignment = .right
         displayLabel.numberOfLines = 1
         displayLabel.adjustsFontSizeToFitWidth = true
@@ -92,14 +106,68 @@ extension ViewController {
     }
     
     @objc private func buttonTapped(_ sender: MyButton) {
-        guard let title = sender.title(for: .normal) else { return }
-        
         let row = sender.tag / 10
         let col = sender.tag % 10
+        let buttonType = calculatorLayout[row][col]
         
-        print("button '\(title)' tapped - position: (\(row), \(col))")
-        
-        displayLabel.text = title
+        switch buttonType {
+            case .number(let number):
+                //  실제 숫자값을 NumberInputHandler로 전달
+                numberInputHandler.handleNumberInput(number)
+                //  상태 업데이트
+                buttonStateManager.onNumberInput()
+                
+                //  계산기 값.전달
+                guard let currentValue = numberInputHandler.getCurrentValue() else { return }
+                calculatorBrain.setOperand(currentValue)
+                
+            case .number("."):
+                numberInputHandler.handleDecimalInput()
+                buttonStateManager.onNumberInput()
+                
+            case .clear(_):
+                let action = buttonStateManager.handleClearButtonAction()
+                switch action {
+                    case .allClear:
+                        numberInputHandler.clearDisplay()
+                        calculatorBrain.clear()
+                        buttonStateManager.onClearButtonPressed()
+                    case .deleteLast:
+                        numberInputHandler.deleteLastCharacter()
+                }
+            case .mathOperator(let op):
+                if let operation = SelectedOperator.fromString(op) {
+                    calculatorBrain.performOperation(operation)
+                    
+                    let result = calculatorBrain.getResult()
+                    numberInputHandler.setDisplayValue(result)
+                    
+                    if operation == .equal {
+                        buttonStateManager.onCalculationComplete()
+                        buttonStateManager.setSelectedOperator(nil)
+                    } else {
+                        buttonStateManager.setSelectedOperator(operation)
+                    }
+                }
+            case .operatorImage("plus.forwardslash.minus"):
+                numberInputHandler.toggleSign()
+            case .operatorImage("percent"):
+                print("🔘 Percent button pressed!")
+                if let operation = SelectedOperator.fromString("percent") {
+                    print("🔘 Percent operation created")
+
+                    calculatorBrain.performOperation(operation)
+                    
+                    let result = calculatorBrain.getResult()
+                    numberInputHandler.setDisplayValue(result)
+                    buttonStateManager.setSelectedOperator(operation)
+                }
+                
+                guard let currentValue = numberInputHandler.getCurrentValue() else { return }
+                calculatorBrain.setOperand(currentValue)
+            default:
+                break
+        }
     }
     
     final private func setConstraints() {
@@ -111,14 +179,7 @@ extension ViewController {
         
         view.addSubview(mainStackView)
         mainStackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let screenWidth = UIScreen.main.bounds.width
-        let padding: CGFloat = 40   //  좌우 패딩 (20 + 20)
-        let buttonSpacing: CGFloat = 10 * 3 //  버튼 간 간격 (3개의 간격)
-        let availableWidth = screenWidth - padding - buttonSpacing
-        let buttonSize = availableWidth / 4  //  4개 버튼으로 나누기
-        let gridHeight = (buttonSize * 5) + (10 * 4)
-        
+        let gridHeight = calculateGridHeight()
         
         NSLayoutConstraint.activate([
 //            mainStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
