@@ -103,11 +103,14 @@ class ButtonStateManager {
     }
     
     func setSelectedOperator(_ operation: SelectedOperator?) {
+        let wasNil = selectedOperator == nil
         selectedOperator = operation
         
-        if operation != nil && operation != .equal {
+        if operation != nil && operation != .equal && wasNil {
             setStartNewInput(true)
-            print("🔄 Set shouldStartNewInput = true for operation: \(operation?.symbol ?? "nil")")
+            print("🔄 Set shouldStartNewInput = true for NEW operation: \(operation?.symbol ?? "nil")")
+        } else {
+            print("🔄 NOT setting shouldStartNewInput for operation: \(operation?.symbol ?? "nil")")
         }
     }
     

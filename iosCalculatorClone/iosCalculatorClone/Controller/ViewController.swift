@@ -12,6 +12,7 @@ class ViewController: UIViewController {
     
     let allView = UIView()
     var calculatorButtons: [MyButton] = []
+    let displayScrollView = UIScrollView()
     let displayLabel = UILabel()
 //    let btn1 = MyButton(title: "AC", color: .systemGray, textColor: .systemBackground)
     let buttonStateManager = ButtonStateManager()
@@ -39,5 +40,6 @@ class ViewController: UIViewController {
 //        view.addSubview(btn1)
         configureUI()
     }
+
 }
 
