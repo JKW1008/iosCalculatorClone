@@ -87,16 +87,40 @@ extension ViewController {
     
     final private func setAttributes() {
         view.backgroundColor = .black
-        
+        configureDisplayScrollView()
+    }
+    
+    private func configureDisplayScrollView() {
         let buttonSize = calculateButtonSize()
-        let fontSize = buttonSize * 0.8
+        let baseFontSize = buttonSize * 0.8
+        
+        //  ScrollView 설정
+        displayScrollView.showsVerticalScrollIndicator = false
+        displayScrollView.showsHorizontalScrollIndicator = false
+        displayScrollView.bounces = true
+//        displayScrollView.translatesAutoresizingMaskIntoConstraints = false
+        
         displayLabel.text = "0"
         displayLabel.textColor = .white
-        displayLabel.font = .systemFont(ofSize: fontSize, weight: .light)
+        displayLabel.font = .monospacedDigitSystemFont(ofSize: baseFontSize, weight: .light)
         displayLabel.textAlignment = .right
         displayLabel.numberOfLines = 1
-        displayLabel.adjustsFontSizeToFitWidth = true
-        displayLabel.minimumScaleFactor = 0.5
+        displayLabel.adjustsFontSizeToFitWidth = false
+        displayLabel.minimumScaleFactor = 1.0
+        displayLabel.lineBreakMode = .byClipping
+        displayLabel.translatesAutoresizingMaskIntoConstraints = true
+        
+        displayScrollView.addSubview(displayLabel)
+        displayScrollView.contentSize = CGSize(width: 100, height: 100)
+//        NSLayoutConstraint.activate([
+//            displayLabel.topAnchor.constraint(equalTo: displayScrollView.topAnchor),
+//            displayLabel.bottomAnchor.constraint(equalTo: displayScrollView.bottomAnchor),
+//            displayLabel.leadingAnchor.constraint(equalTo: displayScrollView.leadingAnchor),
+//            displayLabel.trailingAnchor.constraint(equalTo: displayScrollView.trailingAnchor),
+//            displayLabel.heightAnchor.constraint(equalTo: displayScrollView.heightAnchor),
+//            
+//            displayLabel.widthAnchor.constraint(greaterThanOrEqualTo: displayScrollView.widthAnchor)
+//        ])
     }
     
     final private func addTargets() {
@@ -121,10 +145,26 @@ extension ViewController {
                 guard let currentValue = numberInputHandler.getCurrentValue() else { return }
                 calculatorBrain.setOperand(currentValue)
                 
+                print("🔢 After setOperand:")
+                print("🔢 - Previous: \(String(describing: calculatorBrain.getpreviousValue()))")  // private이면 getPreviousValue() 메서드 필요
+                print("🔢 - Current: \(calculatorBrain.getResult())")
+                print("🔢 - Pending: \(calculatorBrain.getPendingOperation()?.symbol ?? "nil")")
+                
+                // 👇 숫자 입력 후 수식이 있으면 수식 표시
+                if let expression = calculatorBrain.getDisplayExpression() {
+                    print("🔢 - Expression: \(expression)")
+                    displayLabel.text = expression  // 직접 설정
+                    numberInputHandler.updateScrollPosition()  // 스크롤 업데이트
+                    print("🔢 Display after setting: '\(displayLabel.text ?? "")'")
+                } else {
+                    print("🔢 No expression, keeping current display")
+                }
+                
             case .number("."):
                 numberInputHandler.handleDecimalInput()
                 buttonStateManager.onNumberInput()
                 
+
             case .clear(_):
                 let action = buttonStateManager.handleClearButtonAction()
                 switch action {
@@ -140,7 +180,7 @@ extension ViewController {
                     calculatorBrain.performOperation(operation)
                     
                     let result = calculatorBrain.getResult()
-                    numberInputHandler.setDisplayValue(result)
+                    numberInputHandler.setDisplayValueWithExpression(result, brain: calculatorBrain)
                     
                     if operation == .equal {
                         buttonStateManager.onCalculationComplete()
@@ -171,8 +211,9 @@ extension ViewController {
     }
     
     final private func setConstraints() {
+        
         let buttonGrid = createButtonGrid()
-        let mainStackView = UIStackView(arrangedSubviews: [displayLabel, buttonGrid])
+        let mainStackView = UIStackView(arrangedSubviews: [displayScrollView, buttonGrid])
         mainStackView.axis = .vertical
         mainStackView.distribution = .fill
         mainStackView.spacing = 20
@@ -187,7 +228,7 @@ extension ViewController {
             mainStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             mainStackView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20 ),
             
-            displayLabel.heightAnchor.constraint(equalToConstant: 100),
+            displayScrollView.heightAnchor.constraint(equalToConstant: 100),
             buttonGrid.heightAnchor.constraint(equalToConstant: gridHeight),
             
         ])
@@ -229,6 +270,16 @@ extension ViewController {
             //  완전한 원형 보장
             let size = min(button.frame.width, button.frame.height)
             button.layer.cornerRadius = size / 2
+        }
+        
+        if displayLabel.frame.width == 0 || displayLabel.frame.height == 0 {
+            let scrollHeight = displayScrollView.frame.height
+            let scrollWidth = displayScrollView.frame.width
+            // Label 초기 크기 설정
+            displayLabel.frame = CGRect(x: 0, y: 0, width: scrollWidth, height: scrollHeight)
+            
+            // ScrollView contentSize 초기 설정
+            displayScrollView.contentSize = CGSize(width: scrollWidth, height: scrollHeight)
         }
     }
 }

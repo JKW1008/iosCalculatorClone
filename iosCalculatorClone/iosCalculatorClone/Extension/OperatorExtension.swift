@@ -15,9 +15,52 @@ class CalculatorBrain {
     
     func setOperand(_ operand: Double) {
         currentValue = operand
-        isWaitingForSecondOperand = false
-        
+        if pendingOperation != nil && isWaitingForSecondOperand {
+             isWaitingForSecondOperand = false
+             print("🔢 Set isWaitingForSecondOperand = false")
+         }
+         
+         print("🔢 setOperand: previous=\(previousValue), current=\(currentValue), pending=\(pendingOperation?.symbol ?? "nil"), waiting=\(isWaitingForSecondOperand)")
+         
+         // 디버깅: 수식 확인
+         if let expression = getDisplayExpression() {
+             print("🔢 Expression should be: '\(expression)'")
+         }
         print("set operand \(operand)")
+    }
+    
+    func getDisplayExpression() -> String? {
+        print("🔢 getDisplayExpression called:")
+        print("🔢 - pendingOperation: \(pendingOperation?.symbol ?? "nil")")
+        print("🔢 - isWaitingForSecondOperand: \(isWaitingForSecondOperand)")
+        guard let operation = pendingOperation else {
+            print("🔢 - Returning nil (no operation or waiting)")
+
+            return nil }
+        
+        if isWaitingForSecondOperand {
+            return "\(formatNumber(previousValue))\(operation.symbol)"
+        } else {
+            return "\(formatNumber(previousValue))\(operation.symbol)\(formatNumber(currentValue))"
+        }
+    }
+    
+    func getpreviousValue() -> String? {
+        return String(previousValue)
+    }
+    
+    private func formatNumber(_ value: Double) -> String {
+
+        if value.truncatingRemainder(dividingBy: 1) == 0 {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.maximumFractionDigits = 0
+            
+            if let formattedString = formatter.string(from: NSNumber(value: value)) {
+                return formattedString
+            }
+        }
+        return String(value)
     }
     
     func performOperation(_ operation: SelectedOperator) {
@@ -71,7 +114,7 @@ class CalculatorBrain {
             case .multiply: result = previousValue * currentValue
             case .divide:
                 if currentValue == 0 {
-                    result = 0
+                    result = Double.nan
                 } else {
                     result = previousValue / currentValue
                 }

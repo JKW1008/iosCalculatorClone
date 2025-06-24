@@ -30,7 +30,7 @@ enum SelectedOperator {
         switch self {
             case .plus: return "+"
             case .minus: return "-"
-            case .multiply: return "*"
+            case .multiply: return "×"
             case .divide: return "÷"
             case .modulo: return "%"
             case .equal: return "="
